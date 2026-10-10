@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تجربة العرض السينمائي</title>
+    
+    <!-- خطوط جوجل -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            font-family: 'Cairo', sans-serif;
+            overflow: hidden; /* منع التمرير باش يبقى العرض سينمائي */
+        }
+
+        /* 1. فيديو الخلفية */
+        #bgVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover; /* يخلي الفيديو يغطي الشاشة كاملة بلا ما يتعوج */
+            z-index: -2;
+            background: #000;
+        }
+
+        /* 2. طبقة تظليل خفيفة باش تبان الكتيبة (اختيارية) */
+        .overlay-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
+            z-index: -1;
+        }
+
+        /* 3. شاشة البداية (طلب الصوت) */
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease;
+        }
+
+        .start-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .start-btn:hover {
+            background: #fff;
+            color: #000;
+            transform: translateY(-3px);
+        }
+
+        .start-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        /* 4. واجهة المستخدم بعد تشغيل الفيديو */
+        #mainUI {
+            position: relative;
+            z-index: 10;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 20px;
+            opacity: 0;
+            transition: opacity 1s ease 0.5s; /* تظهر ببطء بعد ما يروح الـ start screen */
+            pointer-events: none; /* باش الكليكات يجوزو */
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            pointer-events: auto;
+        }
+
+        .logo {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            direction: ltr; /* نخلو اللوغو بالانجليزية يسار ليمين */
+        }
+
+        .footer-text {
+            pointer-events: auto;
+            text-align: right;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #cccccc;
+            max-width: 400px;
+        }
+
+        /* رسالة تظهر كي يكمل الفيديو */
+        #endMessage {
+            display: none;
+            color: #00f0ff;
+            font-weight: 700;
+            margin-top: 20px;
+            animation: fadeIn 1s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- كود الفيديو:
+         - ما فيهش "loop" باش يحبس في اللقطة التوالية
+         - ما فيهش "autoplay" باش ما يقلعش وحدو
+         - فيه "playsinline" ضرورية للآيفون باش ما يحلش في شاشة كاملة
+    -->
+    <video id="bgVideo" playsinline preload="auto">
+        <source src="chikor.mp4" type="video/mp4">
+        متصفحك لا يدعم تشغيل الفيديو.
+    </video>
+
+    <div class="overlay-gradient"></div>
+
+    <!-- شاشة طلب الصوت -->
+    <div id="startScreen">
+        <button class="start-btn" id="startBtn">
+            اضغط لبدء العرض
+            <svg viewBox="0 0 24 24">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- الواجهة الرئيسية -->
+    <div id="mainUI">
+        <header>
+            <div class="logo">CHIKOR.PRO</div>
+        </header>
+
+        <div class="footer-text">
+            <h1>تجربة سينمائية</h1>
+            <p>عند انتهاء العرض، ستبقى الصورة النهائية ثابتة في الخلفية.</p>
+            <div id="endMessage">🎬 انتهى العرض.</div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('bgVideo');
+        const startScreen = document.getElementById('startScreen');
+        const startBtn = document.getElementById('startBtn');
+        const mainUI = document.getElementById('mainUI');
+        const endMessage = document.getElementById('endMessage');
+
+        // 1. عند الضغط على الزر
+        startBtn.addEventListener('click', () => {
+            // إخفاء شاشة البداية
+            startScreen.style.opacity = '0';
+            setTimeout(() => {
+                startScreen.style.display = 'none';
+            }, 600);
+
+            // إظهار الواجهة الرئيسية
+            mainUI.style.opacity = '1';
+
+            // تشغيل الفيديو مع الصوت من البداية
+            video.muted = false;
+            video.currentTime = 0;
+            video.play().catch(error => {
+                console.error("خطأ في تشغيل الفيديو:", error);
+            });
+        });
+
+        // 2. حدث (Event) يخدم كي يخلص الفيديو تماماً
+        video.addEventListener('ended', () => {
+            // الفيديو راح يحبس وحدو في الفريم الأخير باسكو ماكاش "loop"
+            // هنا نقدرو نزيدو أي حاجة حابينها تبان كي يكمل، مثلاً نص أو زر إعارة
+            endMessage.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
