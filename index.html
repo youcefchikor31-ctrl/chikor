@@ -1,14 +1,23 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تجربة العرض السينمائي</title>
+    <title>Sarra - Personal Space</title>
     
-    <!-- خطوط جوجل -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Outfit for modern text, Parisienne for the name -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Parisienne&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --pink-accent: #ff8fa3;
+            --text-color: #ffffff;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,176 +26,305 @@
 
         body {
             background-color: #050505;
-            color: #ffffff;
-            font-family: 'Cairo', sans-serif;
-            overflow: hidden; /* منع التمرير باش يبقى العرض سينمائي */
+            color: var(--text-color);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* 1. فيديو الخلفية */
+        /* Video Background */
         #bgVideo {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover; /* يخلي الفيديو يغطي الشاشة كاملة بلا ما يتعوج */
-            z-index: -2;
-            background: #000;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            object-fit: cover;
+            z-index: -3;
         }
 
-        /* 2. طبقة تظليل خفيفة باش تبان الكتيبة (اختيارية) */
-        .overlay-gradient {
+        /* Overlay to make text readable */
+        .overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
-            z-index: -1;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+            z-index: -2;
         }
 
-        /* 3. شاشة البداية (طلب الصوت) */
+        /* Start Screen */
         #startScreen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(5, 5, 5, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 999;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .welcome-title {
+            font-family: 'Parisienne', cursive;
+            font-size: 4rem;
+            margin-bottom: 30px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         .start-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
             color: #fff;
-            padding: 20px 40px;
+            padding: 15px 40px;
             font-size: 1.2rem;
-            font-family: 'Cairo', sans-serif;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
             border-radius: 50px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
         }
 
         .start-btn:hover {
-            background: #fff;
-            color: #000;
+            background: rgba(255, 255, 255, 0.25);
             transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
 
-        .start-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        /* 4. واجهة المستخدم بعد تشغيل الفيديو */
+        /* Main UI (Hidden until video ends) */
         #mainUI {
             position: relative;
             z-index: 10;
-            height: 100vh;
+            width: 100vw; height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 40px 20px;
+            align-items: center;
+            justify-content: center;
             opacity: 0;
-            transition: opacity 1s ease 0.5s; /* تظهر ببطء بعد ما يروح الـ start screen */
-            pointer-events: none; /* باش الكليكات يجوزو */
+            pointer-events: none;
+            transition: opacity 1.5s ease;
         }
 
-        header {
+        #mainUI.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .main-name {
+            font-family: 'Parisienne', cursive;
+            font-size: 3.5rem;
+            position: absolute;
+            top: 15%;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Views Container (Pages inside the UI) */
+        .view-container {
+            position: absolute;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .view-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Glass Buttons for Main Menu */
+        .glass-btn {
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 20px;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
             display: flex;
             justify-content: space-between;
-            pointer-events: auto;
+            align-items: center;
         }
 
-        .logo {
-            font-family: 'Syncopate', sans-serif;
+        .glass-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-btn i {
+            font-size: 1.4rem;
+            color: var(--pink-accent);
+        }
+
+        /* Glass Cards for Sections */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .glass-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .about-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #eee;
+            text-align: center;
+            min-height: 80px; /* Space for future text */
+        }
+
+        /* Social Links */
+        .social-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px 20px;
+            border-radius: 15px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .social-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--glass-border);
+            transform: translateX(5px);
+        }
+
+        .social-item i {
             font-size: 1.5rem;
-            letter-spacing: 2px;
-            direction: ltr; /* نخلو اللوغو بالانجليزية يسار ليمين */
+        }
+        
+        .social-item.ig i { color: #E1306C; }
+        .social-item.tk i { color: #fff; text-shadow: 2px 2px 0 #ff0050, -2px -2px 0 #00f2fe; }
+        .social-item.sn i { color: #FFFC00; text-shadow: 0 0 2px #000; }
+
+        /* Back Button */
+        .back-btn {
+            margin-top: 25px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            color: #000;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
         }
 
-        .footer-text {
-            pointer-events: auto;
-            text-align: right;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 6vw, 4rem);
-            font-weight: 900;
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-
-        p {
-            font-size: 1.1rem;
-            color: #cccccc;
-            max-width: 400px;
-        }
-
-        /* رسالة تظهر كي يكمل الفيديو */
-        #endMessage {
-            display: none;
-            color: #00f0ff;
-            font-weight: 700;
-            margin-top: 20px;
-            animation: fadeIn 1s forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .back-btn:hover {
+            background: #fff;
+            transform: scale(1.02);
         }
 
     </style>
 </head>
 <body>
 
-    <!-- كود الفيديو:
-         - ما فيهش "loop" باش يحبس في اللقطة التوالية
-         - ما فيهش "autoplay" باش ما يقلعش وحدو
-         - فيه "playsinline" ضرورية للآيفون باش ما يحلش في شاشة كاملة
-    -->
+    <!-- Video Background (No Loop) -->
     <video id="bgVideo" playsinline preload="auto">
         <source src="chikor.mp4" type="video/mp4">
-        متصفحك لا يدعم تشغيل الفيديو.
     </video>
 
-    <div class="overlay-gradient"></div>
+    <!-- Dark Overlay -->
+    <div class="overlay"></div>
 
-    <!-- شاشة طلب الصوت -->
+    <!-- Start Screen -->
     <div id="startScreen">
-        <button class="start-btn" id="startBtn">
-            اضغط لبدء العرض
-            <svg viewBox="0 0 24 24">
-                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-            </svg>
-        </button>
+        <h1 class="welcome-title">Sarra</h1>
+        <button class="start-btn" id="startBtn">Click to Start</button>
     </div>
 
-    <!-- الواجهة الرئيسية -->
+    <!-- Main UI (Appears after video ends) -->
     <div id="mainUI">
-        <header>
-            <div class="logo">CHIKOR.PRO</div>
-        </header>
+        <h1 class="main-name">Sarra</h1>
 
-        <div class="footer-text">
-            <h1>تجربة سينمائية</h1>
-            <p>عند انتهاء العرض، ستبقى الصورة النهائية ثابتة في الخلفية.</p>
-            <div id="endMessage">🎬 انتهى العرض.</div>
+        <!-- View 1: Main Menu Buttons -->
+        <div id="menuView" class="view-container active">
+            <button class="glass-btn" onclick="switchView('aboutView')">
+                About Me <i class="fa-solid fa-user"></i>
+            </button>
+            <button class="glass-btn" onclick="switchView('socialsView')">
+                My Socials <i class="fa-solid fa-heart"></i>
+            </button>
+        </div>
+
+        <!-- View 2: About Me Section -->
+        <div id="aboutView" class="view-container">
+            <div class="glass-card">
+                <h2>About Me</h2>
+                <!-- يمكنك ملء النص هنا لاحقاً -->
+                <div class="about-content">
+                    
+                </div>
+                <button class="back-btn" onclick="switchView('menuView')">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+
+        <!-- View 3: Socials Section -->
+        <div id="socialsView" class="view-container">
+            <div class="glass-card">
+                <h2>My Socials</h2>
+                <div class="social-list">
+                    <a href="#" class="social-item ig">
+                        <i class="fa-brands fa-instagram"></i> Instagram
+                    </a>
+                    <a href="#" class="social-item tk">
+                        <i class="fa-brands fa-tiktok"></i> TikTok
+                    </a>
+                    <a href="#" class="social-item sn">
+                        <i class="fa-brands fa-snapchat"></i> Snapchat
+                    </a>
+                </div>
+                <button class="back-btn" onclick="switchView('menuView')">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+            </div>
         </div>
     </div>
 
@@ -195,33 +333,33 @@
         const startScreen = document.getElementById('startScreen');
         const startBtn = document.getElementById('startBtn');
         const mainUI = document.getElementById('mainUI');
-        const endMessage = document.getElementById('endMessage');
 
-        // 1. عند الضغط على الزر
+        // Play video and hide start screen
         startBtn.addEventListener('click', () => {
-            // إخفاء شاشة البداية
             startScreen.style.opacity = '0';
             setTimeout(() => {
-                startScreen.style.display = 'none';
-            }, 600);
+                startScreen.style.visibility = 'hidden';
+            }, 800);
 
-            // إظهار الواجهة الرئيسية
-            mainUI.style.opacity = '1';
-
-            // تشغيل الفيديو مع الصوت من البداية
             video.muted = false;
             video.currentTime = 0;
-            video.play().catch(error => {
-                console.error("خطأ في تشغيل الفيديو:", error);
-            });
+            video.play().catch(e => console.log("Play error:", e));
         });
 
-        // 2. حدث (Event) يخدم كي يخلص الفيديو تماماً
+        // Show Main UI when video ends
         video.addEventListener('ended', () => {
-            // الفيديو راح يحبس وحدو في الفريم الأخير باسكو ماكاش "loop"
-            // هنا نقدرو نزيدو أي حاجة حابينها تبان كي يكمل، مثلاً نص أو زر إعارة
-            endMessage.style.display = 'block';
+            mainUI.classList.add('show');
         });
+
+        // Function to switch between views (Menu, About, Socials)
+        function switchView(viewId) {
+            // Hide all views
+            document.querySelectorAll('.view-container').forEach(view => {
+                view.classList.remove('active');
+            });
+            // Show the requested view
+            document.getElementById(viewId).classList.add('active');
+        }
     </script>
 </body>
 </html>
