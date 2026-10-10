@@ -18,9 +18,29 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #f1f2f6; color: var(--text-dark); font-family: 'Delius', cursive; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        
+        /* زدنا خلفية وردية خفيفة ورا الفيديو */
+        body { 
+            background-color: #ffeef2; 
+            color: var(--text-dark); 
+            font-family: 'Delius', cursive; 
+            overflow: hidden; 
+            -webkit-tap-highlight-color: transparent; 
+        }
 
-        #bgVideo { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -3; }
+        /* 1. فيديو الخلفية (تم التصليح هنا) */
+        #bgVideo { 
+            position: fixed; 
+            top: 50%; /* باش يتسنطر في الوسط */
+            left: 50%; 
+            transform: translate(-50%, -50%); /* باش يتسنطر في الوسط */
+            width: 100vw; 
+            height: 100vh; 
+            /* بدّلنا cover بـ contain باش يبان كامل بلا زوم */
+            object-fit: contain; 
+            z-index: -3; 
+        }
+
         .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.15); z-index: -2; }
 
         #startScreen {
@@ -51,14 +71,16 @@
         }
         #mainUI.show { opacity: 1; pointer-events: auto; }
 
+        /* طلعنا الاسم الفوق شوية باش ما يجيش فوق الفيديو */
         .main-name {
             font-family: 'Parisienne', cursive; font-size: 4rem; color: var(--kitty-pink);
-            position: absolute; top: 10%; text-shadow: 2px 2px 0px #fff;
+            position: absolute; top: 5%; text-shadow: 2px 2px 0px #fff;
         }
 
+        /* هبطنا الأزرار شوية لتحت */
         .view-container {
             position: absolute; width: 100%; max-width: 380px; padding: 20px;
-            display: flex; flex-direction: column; gap: 20px;
+            display: flex; flex-direction: column; gap: 20px; bottom: 10%;
             opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .view-container.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
@@ -115,7 +137,6 @@
         <button class="start-btn" id="startBtn">Open Gift 🎀</button>
     </div>
 
-    <!-- mainUI will now show immediately after clicking Open Gift -->
     <div id="mainUI">
         <h1 class="main-name">Sarra</h1>
 
@@ -161,7 +182,6 @@
                 startScreen.style.visibility = 'hidden';
             }, 800);
 
-            // Show UI immediately when video starts
             mainUI.classList.add('show');
 
             video.muted = false;
