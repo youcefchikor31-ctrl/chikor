@@ -3,327 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sarra - Personal Space</title>
+    <title>Sarra - Hello Kitty Theme</title>
     
-    <!-- Google Fonts: Outfit for modern text, Parisienne for the name -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Parisienne&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Social Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Delius&family=Parisienne&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --pink-accent: #ff8fa3;
-            --text-color: #ffffff;
+            --kitty-pink: #ff6b81;
+            --kitty-blue: #70a1ff;
+            --pastel-bg: rgba(255, 255, 255, 0.4);
+            --card-border: rgba(255, 255, 255, 0.7);
+            --text-dark: #2f3542;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f1f2f6; color: var(--text-dark); font-family: 'Delius', cursive; overflow: hidden; -webkit-tap-highlight-color: transparent; }
 
-        body {
-            background-color: #050505;
-            color: var(--text-color);
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
+        #bgVideo { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -3; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.15); z-index: -2; }
 
-        /* Video Background */
-        #bgVideo {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            object-fit: cover;
-            z-index: -3;
-        }
-
-        /* Overlay to make text readable */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
-            z-index: -2;
-        }
-
-        /* Start Screen */
         #startScreen {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
             transition: opacity 0.8s ease, visibility 0.8s;
         }
 
         .welcome-title {
-            font-family: 'Parisienne', cursive;
-            font-size: 4rem;
-            margin-bottom: 30px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-family: 'Parisienne', cursive; font-size: 5rem; color: var(--kitty-pink); margin-bottom: 25px;
+            text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff; animation: bounce 2s infinite;
         }
+
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .start-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            font-family: 'Outfit', sans-serif;
-            border-radius: 50px;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
+            background: #fff; border: 3px solid var(--kitty-pink); color: var(--kitty-pink); padding: 15px 40px;
+            font-size: 1.4rem; font-family: 'Delius', cursive; font-weight: bold; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 107, 129, 0.3); transition: all 0.3s ease;
         }
+        .start-btn:hover { background: var(--kitty-pink); color: #fff; transform: scale(1.05); }
 
-        .start-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        /* Main UI (Hidden until video ends) */
         #mainUI {
-            position: relative;
-            z-index: 10;
-            width: 100vw; height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1.5s ease;
+            position: relative; z-index: 10; width: 100vw; height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 1.5s ease;
         }
-
-        #mainUI.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #mainUI.show { opacity: 1; pointer-events: auto; }
 
         .main-name {
-            font-family: 'Parisienne', cursive;
-            font-size: 3.5rem;
-            position: absolute;
-            top: 15%;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-family: 'Parisienne', cursive; font-size: 4rem; color: var(--kitty-pink);
+            position: absolute; top: 10%; text-shadow: 2px 2px 0px #fff;
         }
 
-        /* Views Container (Pages inside the UI) */
         .view-container {
-            position: absolute;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; width: 100%; max-width: 380px; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
+            opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .view-container.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 
-        .view-container.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        /* Glass Buttons for Main Menu */
         .glass-btn {
-            width: 100%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 20px;
-            color: #fff;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            width: 100%; background: var(--pastel-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 2px solid var(--card-border); padding: 22px; border-radius: 30px; color: var(--text-dark);
+            font-family: 'Delius', cursive; font-size: 1.4rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); transition: all 0.3s ease; display: flex; justify-content: space-between; align-items: center;
         }
+        .glass-btn:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-5px); border-color: #fff; }
+        .glass-btn i { font-size: 1.6rem; color: var(--kitty-pink); }
+        .glass-btn:nth-child(2) i { color: var(--kitty-blue); }
 
-        .glass-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-5px);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .glass-btn i {
-            font-size: 1.4rem;
-            color: var(--pink-accent);
-        }
-
-        /* Glass Cards for Sections */
         .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 25px;
-            padding: 30px;
-            width: 100%;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            background: var(--pastel-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 2px solid var(--card-border); border-radius: 30px; padding: 30px; width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center;
         }
-
-        .glass-card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 800;
-        }
-
-        .about-content {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #eee;
-            text-align: center;
-            min-height: 80px; /* Space for future text */
-        }
-
-        /* Social Links */
-        .social-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .social-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(0,0,0,0.2);
-            padding: 15px 20px;
-            border-radius: 15px;
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-        }
-
-        .social-item:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: var(--glass-border);
-            transform: translateX(5px);
-        }
-
-        .social-item i {
-            font-size: 1.5rem;
-        }
+        .glass-card h2 { font-size: 2rem; margin-bottom: 25px; color: var(--kitty-pink); text-shadow: 1px 1px 0px #fff; }
         
+        .about-content { font-size: 1.1rem; line-height: 1.6; color: var(--text-dark); min-height: 100px; background: rgba(255, 255, 255, 0.4); padding: 15px; border-radius: 15px; }
+        
+        .social-list { display: flex; flex-direction: column; gap: 15px; }
+        .social-item {
+            display: flex; align-items: center; gap: 15px; background: #fff; padding: 15px 25px;
+            border-radius: 20px; color: var(--text-dark); text-decoration: none; font-weight: bold; font-size: 1.2rem;
+            transition: all 0.3s; border: 2px solid transparent; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .social-item:hover { transform: translateX(5px) scale(1.02); border-color: var(--kitty-pink); }
+        .social-item i { font-size: 1.8rem; }
         .social-item.ig i { color: #E1306C; }
-        .social-item.tk i { color: #fff; text-shadow: 2px 2px 0 #ff0050, -2px -2px 0 #00f2fe; }
-        .social-item.sn i { color: #FFFC00; text-shadow: 0 0 2px #000; }
+        .social-item.tk i { color: #000; }
+        .social-item.sn i { color: #eebb00; }
 
-        /* Back Button */
         .back-btn {
-            margin-top: 25px;
-            width: 100%;
-            padding: 12px;
-            border-radius: 15px;
-            border: none;
-            background: rgba(255,255,255,0.9);
-            color: #000;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
+            margin-top: 25px; width: 100%; padding: 15px; border-radius: 20px; border: none;
+            background: var(--kitty-blue); color: #fff; font-family: 'Delius', cursive; font-weight: bold; font-size: 1.2rem;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(112, 161, 255, 0.4); display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-
-        .back-btn:hover {
-            background: #fff;
-            transform: scale(1.02);
-        }
-
+        .back-btn:hover { background: #5b8deb; transform: scale(1.02); }
     </style>
 </head>
 <body>
 
-    <!-- Video Background (No Loop) -->
     <video id="bgVideo" playsinline preload="auto">
         <source src="chikor.mp4" type="video/mp4">
     </video>
 
-    <!-- Dark Overlay -->
     <div class="overlay"></div>
 
-    <!-- Start Screen -->
     <div id="startScreen">
         <h1 class="welcome-title">Sarra</h1>
-        <button class="start-btn" id="startBtn">Click to Start</button>
+        <button class="start-btn" id="startBtn">Open Gift 🎀</button>
     </div>
 
-    <!-- Main UI (Appears after video ends) -->
+    <!-- mainUI will now show immediately after clicking Open Gift -->
     <div id="mainUI">
         <h1 class="main-name">Sarra</h1>
 
-        <!-- View 1: Main Menu Buttons -->
         <div id="menuView" class="view-container active">
             <button class="glass-btn" onclick="switchView('aboutView')">
-                About Me <i class="fa-solid fa-user"></i>
+                About Me <i class="fa-solid fa-star"></i>
             </button>
             <button class="glass-btn" onclick="switchView('socialsView')">
                 My Socials <i class="fa-solid fa-heart"></i>
             </button>
         </div>
 
-        <!-- View 2: About Me Section -->
         <div id="aboutView" class="view-container">
             <div class="glass-card">
                 <h2>About Me</h2>
-                <!-- يمكنك ملء النص هنا لاحقاً -->
-                <div class="about-content">
-                    
-                </div>
-                <button class="back-btn" onclick="switchView('menuView')">
-                    <i class="fa-solid fa-arrow-left"></i> Back
-                </button>
+                <div class="about-content"></div>
+                <button class="back-btn" onclick="switchView('menuView')"><i class="fa-solid fa-arrow-left"></i> Back</button>
             </div>
         </div>
 
-        <!-- View 3: Socials Section -->
         <div id="socialsView" class="view-container">
             <div class="glass-card">
                 <h2>My Socials</h2>
                 <div class="social-list">
-                    <a href="#" class="social-item ig">
-                        <i class="fa-brands fa-instagram"></i> Instagram
-                    </a>
-                    <a href="#" class="social-item tk">
-                        <i class="fa-brands fa-tiktok"></i> TikTok
-                    </a>
-                    <a href="#" class="social-item sn">
-                        <i class="fa-brands fa-snapchat"></i> Snapchat
-                    </a>
+                    <a href="#" class="social-item ig"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                    <a href="#" class="social-item tk"><i class="fa-brands fa-tiktok"></i> TikTok</a>
+                    <a href="#" class="social-item sn"><i class="fa-brands fa-snapchat"></i> Snapchat</a>
                 </div>
-                <button class="back-btn" onclick="switchView('menuView')">
-                    <i class="fa-solid fa-arrow-left"></i> Back
-                </button>
+                <button class="back-btn" onclick="switchView('menuView')"><i class="fa-solid fa-arrow-left"></i> Back</button>
             </div>
         </div>
     </div>
@@ -334,30 +155,24 @@
         const startBtn = document.getElementById('startBtn');
         const mainUI = document.getElementById('mainUI');
 
-        // Play video and hide start screen
         startBtn.addEventListener('click', () => {
             startScreen.style.opacity = '0';
             setTimeout(() => {
                 startScreen.style.visibility = 'hidden';
             }, 800);
 
+            // Show UI immediately when video starts
+            mainUI.classList.add('show');
+
             video.muted = false;
             video.currentTime = 0;
             video.play().catch(e => console.log("Play error:", e));
         });
 
-        // Show Main UI when video ends
-        video.addEventListener('ended', () => {
-            mainUI.classList.add('show');
-        });
-
-        // Function to switch between views (Menu, About, Socials)
         function switchView(viewId) {
-            // Hide all views
             document.querySelectorAll('.view-container').forEach(view => {
                 view.classList.remove('active');
             });
-            // Show the requested view
             document.getElementById(viewId).classList.add('active');
         }
     </script>
